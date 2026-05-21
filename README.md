@@ -49,6 +49,10 @@ yw-mall-docs/
 
 - [`bugs/`](bugs/README.md) — 按根因类型归档（前后端契约 / 基础设施 / 数据库复制 / schema drift / placeholder）— 不按时间，看同类先例先翻这里
 
+### 运维手册
+
+- [`runbooks/logs.md`](runbooks/logs.md) — 日志查询 (Grafana Loki / podman logs / Loki HTTP API 三档速查 + 典型故障复盘场景)
+
 ### 工作日志
 
 - [`daily/2026-05-10.md`](daily/2026-05-10.md) — etcd 配置中心修复 + rebuild.sh
