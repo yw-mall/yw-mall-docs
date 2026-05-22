@@ -133,6 +133,33 @@ curl -sG http://localhost:3100/loki/api/v1/query \
 
 ## 典型场景
 
+### 场景 0：拿用户提供的 ID 关联整条请求链路
+
+每条经 nginx 的请求都被打了两个 ID，对应 Loki 里的不同字段：
+
+| 来源 | 头 | 哪里能拿 | Loki 字段 |
+|------|----|---------|----------|
+| mall-fe nginx | `X-Request-Id` | 浏览器 F12 → Network → Response Headers | APISIX access log 文本里 |
+| go-zero (mall-api / RPC) | W3C `traceparent` | go-zero 自动；mall-api → user-rpc 自动透传同一 trace_id | `trace` label / JSON 字段 |
+
+**用户拿 X-Request-Id 给你时**：先在 APISIX 容器日志里找对应行的 trace_id，再去 Loki：
+
+```bash
+# 1) APISIX 日志里搜 request id（access log 文本格式）
+podman logs apisix 2>&1 | grep d16abad2a68f2595e5a589438e2992c5
+
+# 2) 看 mall-api loghandler 行（同时间窗内即可），拿 trace=
+podman logs --since 10m yw-mall-deploy_mall-api_1 | grep -E '"trace":"[a-f0-9]+"'
+```
+
+**已知 trace_id 反查全链路**（Grafana）：
+
+```logql
+{stack="yw-mall"} | json | trace="dcfa233e4320819853237c3558e4f0f6"
+```
+
+会一行行排出 mall-api / user-rpc / product-rpc / ... 在同一请求里的所有日志（含 SQL），按时间排序就是完整调用栈。
+
 ### 场景 1：用户报错"下单 500"
 
 ```logql
