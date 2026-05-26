@@ -270,7 +270,7 @@ passport.yw-mall.com         主域，所有登录入口
 | L1.3 登录限流 | 1d | ⬜ | — |
 | L1.4 CSRF | 1d | ⬜ | — |
 | L1.5 我的设备 | 3d | ⬜ | — |
-| L1.6 改密下线 | 1d | ⬜ | — |
+| L1.6 改密下线 | 1d | ✅ | 2026-05-27 — ChangePassword + ResetPasswordByCode 成功后调 destroyUserSessionsByRole 按 role 过滤清空 user_sessions:{uid}（admin/c-user 共享同一 set 不冲突） |
 
 ### P2 / P3 跟踪表
 
