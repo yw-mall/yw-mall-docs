@@ -28,6 +28,10 @@ yw-mall-docs/
 启动前置：`cd yw-mall && ./start.sh start`（拉起 16 个 Go 服务）+
 FE 项目按需 `pnpm dev` / `pnpm run build`。
 
+> **FE dev 端口需要手动启**：5173/5174/5175 都是各 FE 项目的 vite dev server，
+> 不会自动起。要走查哪个就 `cd <fe-dir> && pnpm dev`。
+> 容器化端口 18080/18082/18083 由 `yw-mall-deploy/compose.yml` 起。
+
 ### Web 入口（浏览器）
 
 | 端 | URL | 说明 | 默认账号 |
