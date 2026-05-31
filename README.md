@@ -23,6 +23,69 @@ yw-mall-docs/
 
 ---
 
+## 本地走查入口与测试账号
+
+启动前置：`cd yw-mall && ./start.sh start`（拉起 16 个 Go 服务）+
+FE 项目按需 `pnpm dev` / `pnpm run build`。
+
+### Web 入口（浏览器）
+
+| 端 | URL | 说明 | 默认账号 |
+|---|---|---|---|
+| **C 端 H5（用户购物）** | http://localhost:5173 | uni-app vite dev (proxy /api → :18888) | `alice` / `alice123`<br>`bob` / `bob123`<br>`demo` / `demo123` |
+| C 端 H5（容器化） | http://localhost:18080 | yw-mall-deploy 起的 nginx | 同上 |
+| **商家工作台 SPA** | http://localhost:5175 | Vue 3 vite dev (proxy → :18999) | `alice` / `alice123` (shop 1 owner)<br>`bob` / `bob123` (shop 3 owner) |
+| 商家工作台（容器化） | http://localhost:18083 | yw-mall-deploy 起的 nginx | 同上 |
+| **Admin 后台** | http://localhost:18082 | Vue 3 + Element Plus (compose 内) | `admin` / `admin123` |
+| Admin FE dev | http://localhost:5174 | vite dev (proxy → :18999) | 同上 |
+| **Swagger UI** | http://localhost:18081 | C 端 + Admin API 文档双切换 | — |
+| MinIO Console | http://localhost:9001 | 文件桶管理 | `admin` / `admin123` |
+
+### API 网关端口（curl 直调）
+
+| 服务 | URL | 用途 |
+|---|---|---|
+| C 端 API | http://localhost:18888 | mall-api（/api/auth/login 等） |
+| Admin + Merchant API | http://localhost:18999 | yw-mall-admin（/admin/v1 + /merchant/v1） |
+
+### 走查账号细节
+
+| 账号 | 密码 | 角色 | 可走查内容 |
+|---|---|---|---|
+| `alice` | `alice123` | C 端用户（user.id=1）+ shop 1 owner | 全场景：下单 / 支付 / 退款 / 商家工作台所有模块 |
+| `bob` | `bob123` | C 端用户（user.id=3）+ shop 3 owner | 多店铺隔离、跨店购物车验证 |
+| `demo` | `demo123` | C 端用户（user.id=5） | 纯用户视角，无商家权限 |
+| `bob48971` | （邀请注册分配） | shop 1 finance（status=0 未激活） | M1 邀请链接 + 角色权限测试 |
+| `admin` | `admin123` | 平台管理员 | 提现审批 / 仲裁 / 全局数据看板 |
+
+### 高频走查链路
+
+1. **下单 + 优惠** (Phase 1 联动):
+   ```
+   alice 商家：创建活动「满 199 减 30」+ 创建券模板 → C 端 alice 领券
+   → 加购下单 ¥250 + 用券 → /api/cart/calc-price → mock-pay
+   → 看 /api/order/detail/:id 优惠明细
+   ```
+2. **商家退款流转** (M4): C 端 submit refund → 商家 approve / 拒绝 / 仲裁
+3. **退款 3 类**: 仅退款 / 退货退款 / 换货 完整状态机
+4. **多店并发 Dashboard**: alice + bob 同时调 `/merchant/v1/dashboard`
+5. **店铺装修 → C 端店铺主页**: 商家编辑 → C 端 `/api/shop/detail/:id`
+
+### 常用查询
+
+```bash
+# 服务运行状态
+cd yw-mall && ./start.sh status
+
+# 重启某个服务
+cd yw-mall && ./start.sh restart
+
+# Swagger 入口可一站式看所有 API
+open http://localhost:18081
+```
+
+---
+
 ## 关键文档索引
 
 ### 产品需求
